@@ -29,6 +29,10 @@
             android:exported="false" />
             
         <activity
+            android:name=".UpdateCourseActivity"
+            android:exported="false" />
+            
+        <activity
             android:name=".AddCourseActivity"
             android:exported="false" />
             

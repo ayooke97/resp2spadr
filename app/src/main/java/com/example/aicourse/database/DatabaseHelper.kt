@@ -2,6 +2,7 @@ package com.example.aicourse.database
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.aicourse.model.Course
@@ -52,50 +53,97 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val courses = ArrayList<Course>()
         val selectQuery = "SELECT * FROM $TABLE_COURSES"
         val db = this.readableDatabase
-        val cursor = db.rawQuery(selectQuery, null)
+        var cursor: Cursor? = null
         
-        if (cursor.moveToFirst()) {
-            do {
-                val course = Course(
-                    id = cursor.getInt(cursor.getColumnIndex(KEY_ID)),
-                    title = cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
-                    description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION)),
-                    duration = cursor.getString(cursor.getColumnIndex(KEY_DURATION)),
-                    imageUrl = cursor.getString(cursor.getColumnIndex(KEY_IMAGE_URL))
-                )
-                courses.add(course)
-            } while (cursor.moveToNext())
+        try {
+            cursor = db.rawQuery(selectQuery, null)
+            cursor?.let {
+                if (it.moveToFirst()) {
+                    do {
+                        val course = Course(
+                            id = it.getInt(it.getColumnIndexOrThrow(KEY_ID)),
+                            title = it.getString(it.getColumnIndexOrThrow(KEY_TITLE)),
+                            description = it.getString(it.getColumnIndexOrThrow(KEY_DESCRIPTION)),
+                            duration = it.getString(it.getColumnIndexOrThrow(KEY_DURATION)),
+                            imageUrl = it.getString(it.getColumnIndexOrThrow(KEY_IMAGE_URL))
+                        )
+                        courses.add(course)
+                    } while (it.moveToNext())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            cursor?.close()
+            db.close()
         }
-        cursor.close()
-        db.close()
         return courses
     }
 
     fun getCourse(id: Int): Course? {
         val db = this.readableDatabase
-        val cursor = db.query(
-            TABLE_COURSES,
-            arrayOf(KEY_ID, KEY_TITLE, KEY_DESCRIPTION, KEY_DURATION, KEY_IMAGE_URL),
-            "$KEY_ID=?",
-            arrayOf(id.toString()),
-            null,
-            null,
-            null
-        )
+        var cursor: Cursor? = null
+        var course: Course? = null
         
-        return if (cursor.moveToFirst()) {
-            val course = Course(
-                id = cursor.getInt(cursor.getColumnIndex(KEY_ID)),
-                title = cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
-                description = cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION)),
-                duration = cursor.getString(cursor.getColumnIndex(KEY_DURATION)),
-                imageUrl = cursor.getString(cursor.getColumnIndex(KEY_IMAGE_URL))
+        try {
+            cursor = db.query(
+                TABLE_COURSES,
+                arrayOf(KEY_ID, KEY_TITLE, KEY_DESCRIPTION, KEY_DURATION, KEY_IMAGE_URL),
+                "$KEY_ID=?",
+                arrayOf(id.toString()),
+                null,
+                null,
+                null
             )
-            cursor.close()
+            
+            cursor?.let {
+                if (it.moveToFirst()) {
+                    course = Course(
+                        id = it.getInt(it.getColumnIndexOrThrow(KEY_ID)),
+                        title = it.getString(it.getColumnIndexOrThrow(KEY_TITLE)),
+                        description = it.getString(it.getColumnIndexOrThrow(KEY_DESCRIPTION)),
+                        duration = it.getString(it.getColumnIndexOrThrow(KEY_DURATION)),
+                        imageUrl = it.getString(it.getColumnIndexOrThrow(KEY_IMAGE_URL))
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            cursor?.close()
             db.close()
-            course
-        } else {
-            null
         }
+        return course
+    }
+
+    fun updateCourse(course: Course): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put(KEY_TITLE, course.title)
+        values.put(KEY_DESCRIPTION, course.description)
+        values.put(KEY_DURATION, course.duration)
+        values.put(KEY_IMAGE_URL, course.imageUrl)
+        
+        val success = db.update(
+            TABLE_COURSES,
+            values,
+            "$KEY_ID=?",
+            arrayOf(course.id.toString())
+        ) > 0
+        
+        db.close()
+        return success
+    }
+
+    fun deleteCourse(id: Int): Boolean {
+        val db = this.writableDatabase
+        val success = db.delete(
+            TABLE_COURSES,
+            "$KEY_ID=?",
+            arrayOf(id.toString())
+        ) > 0
+        
+        db.close()
+        return success
     }
 }
