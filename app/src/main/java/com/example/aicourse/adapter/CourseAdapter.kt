@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.aicourse.R
 import com.example.aicourse.model.Course
+import java.io.File
 
 class CourseAdapter(
     private val courses: List<Course>,
@@ -34,9 +35,19 @@ class CourseAdapter(
         holder.descriptionTextView.text = course.description
         holder.durationTextView.text = course.duration
 
+        // Load image based on URL type (local file or remote URL)
+        val imageSource = course.imageUrl?.let { url ->
+            when {
+                url.startsWith("http") || url.startsWith("https") -> url
+                url.isNotEmpty() -> File(url)
+                else -> null
+            }
+        }
+
         Glide.with(holder.itemView.context)
-            .load(course.imageUrl)
+            .load(imageSource)
             .placeholder(R.drawable.placeholder)
+            .error(R.drawable.placeholder)
             .into(holder.courseImageView)
 
         holder.itemView.setOnClickListener { onItemClick(course) }

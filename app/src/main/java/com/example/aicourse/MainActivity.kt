@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,6 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.aicourse.adapter.CourseAdapter
 import com.example.aicourse.database.DatabaseHelper
 import com.example.aicourse.model.Course
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -39,7 +41,12 @@ class MainActivity : AppCompatActivity() {
         
         val fab: FloatingActionButton = findViewById(R.id.fabAdd)
         fab.setOnClickListener {
-            startActivity(Intent(this, AddCourseActivity::class.java))
+            try {
+                startActivity(Intent(this, AddCourseActivity::class.java))
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error starting AddCourseActivity", e)
+                Toast.makeText(this, "Error opening course creator", Toast.LENGTH_SHORT).show()
+            }
         }
         
         loadCourses()

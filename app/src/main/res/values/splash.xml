@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background color -->
+        <item name="windowSplashScreenBackground">@color/white</item>
+        
+        <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an animated drawable -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        
+        <!-- Set the theme of the Activity that follows your splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.AICourse</item>
+        
+        <!-- Splash screen animation duration -->
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+    </style>
+</resources>

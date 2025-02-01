@@ -5,5 +5,5 @@ data class Course(
     val title: String,
     val description: String,
     val duration: String,
-    val imageUrl: String
+    val imageUrl: String? = null
 )

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,61 +20,141 @@
             android:gravity="center"
             android:layout_marginBottom="24dp"/>
 
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <ImageView
+                android:id="@+id/ivUpdatePreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/placeholder"
+                android:contentDescription="Course image preview"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabSelectImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:contentDescription="Select image"
+                app:srcCompat="@android:drawable/ic_menu_camera"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/gradient_overlay"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="16dp"
+                android:text="Current Image"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:hint="Course Title"
+            app:startIconDrawable="@android:drawable/ic_menu_edit"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etUpdateTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Course Title"/>
+                android:inputType="text"
+                android:maxLines="1"/>
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:hint="Course Description"
+            app:startIconDrawable="@android:drawable/ic_menu_info_details"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etUpdateDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Course Description"
                 android:inputType="textMultiLine"
-                android:minLines="3"/>
+                android:minLines="3"
+                android:gravity="top"/>
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:hint="Course Duration"
+            app:startIconDrawable="@android:drawable/ic_menu_recent_history"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etUpdateDuration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Course Duration"/>
+                android:inputType="text"
+                android:maxLines="1"/>
+
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp">
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
 
-            <EditText
-                android:id="@+id/etUpdateImageUrl"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Image URL"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                android:hint="Image URL"
+                app:startIconDrawable="@android:drawable/ic_menu_gallery"
+                app:errorEnabled="true"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-        <Button
-            android:id="@+id/btnSaveUpdate"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etUpdateImageUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:maxLines="1"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnValidateUrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Validate"
+                style="@style/Widget.Material3.Button.TextButton"/>
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpdateSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Changes"/>
+            android:text="Update Course"
+            android:padding="12dp"
+            app:cornerRadius="8dp"
+            android:textSize="16sp"/>
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
