@@ -30,7 +30,8 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 
 class AddCourseActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityAddCourseBinding
+    private var _binding: ActivityAddCourseBinding? = null
+    private val binding get() = _binding!!
     private var dbHelper: DatabaseHelper? = null
     private var selectedImageUri: Uri? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main + Job())
@@ -42,8 +43,7 @@ class AddCourseActivity : AppCompatActivity() {
             result.data?.data?.let { uri ->
                 selectedImageUri = uri
                 loadImagePreview(uri.toString())
-                // Clear URL field when image is selected
-                binding.etImageUrl?.setText("")
+                binding.etImageUrl.setText("")
             }
         }
     }
@@ -59,27 +59,79 @@ class AddCourseActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         try {
-            super.onCreate(savedInstanceState)
-            binding = ActivityAddCourseBinding.inflate(layoutInflater)
+            // Apply Material theme
+            setTheme(R.style.Theme_AICourse)
+            
+            // Initialize view binding
+            _binding = ActivityAddCourseBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
+            // Setup action bar
+            setSupportActionBar(binding.toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            supportActionBar?.title = "Add New Course"
+            supportActionBar?.title = getString(R.string.activity_add_course_title)
 
-            dbHelper = DatabaseHelper(this)
+            try {
+                dbHelper = DatabaseHelper(applicationContext)
+            } catch (e: Exception) {
+                Log.e("AddCourseActivity", "Failed to initialize database", e)
+                Toast.makeText(this, "Failed to initialize database", Toast.LENGTH_LONG).show()
+                finish()
+                return
+            }
 
             setupImageSelection()
             setupImageUrlValidation()
             setupSaveButton()
+
+            // Restore state if available
+            savedInstanceState?.let { bundle ->
+                selectedImageUri = bundle.getParcelable("selectedImageUri")
+                selectedImageUri?.let { uri ->
+                    loadImagePreview(uri.toString())
+                }
+            }
         } catch (e: Exception) {
             Log.e("AddCourseActivity", "onCreate failed", e)
+            Toast.makeText(this, "Failed to initialize activity: ${e.message}", Toast.LENGTH_LONG).show()
             finish()
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable("selectedImageUri", selectedImageUri)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            _binding = null
+            coroutineScope.cancel()
+            try {
+                dbHelper?.close()
+            } catch (e: Exception) {
+                Log.e("AddCourseActivity", "Error closing database", e)
+            }
+            dbHelper = null
+        } catch (e: Exception) {
+            Log.e("AddCourseActivity", "Error in onDestroy", e)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            dbHelper?.close()
+        } catch (e: Exception) {
+            Log.e("AddCourseActivity", "Error closing database in onStop", e)
+        }
+    }
+
     private fun setupImageSelection() {
-        binding.fabSelectImage?.setOnClickListener {
+        binding.fabSelectImage.setOnClickListener {
             checkAndRequestPermission()
         }
     }
@@ -87,7 +139,6 @@ class AddCourseActivity : AppCompatActivity() {
     private fun checkAndRequestPermission() {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                // For Android 13 and above
                 when {
                     ContextCompat.checkSelfPermission(
                         this,
@@ -112,7 +163,6 @@ class AddCourseActivity : AppCompatActivity() {
                 }
             }
             else -> {
-                // For Android 12 and below
                 when {
                     ContextCompat.checkSelfPermission(
                         this,
@@ -145,11 +195,11 @@ class AddCourseActivity : AppCompatActivity() {
     }
 
     private fun setupImageUrlValidation() {
-        binding.btnValidateUrl?.setOnClickListener {
+        binding.btnValidateUrl.setOnClickListener {
             try {
-                val url = binding.etImageUrl?.text?.toString()?.trim()
+                val url = binding.etImageUrl.text?.toString()?.trim()
                 if (url.isNullOrEmpty()) {
-                    binding.etImageUrl?.error = "Please enter a URL"
+                    binding.etImageUrl.error = "Please enter a URL"
                     return@setOnClickListener
                 }
                 validateImageUrl(url)
@@ -159,11 +209,10 @@ class AddCourseActivity : AppCompatActivity() {
             }
         }
 
-        binding.etImageUrl?.addTextChangedListener(object : TextWatcher {
+        binding.etImageUrl.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                // Clear selected image when URL is entered
                 if (!s.isNullOrBlank()) {
                     selectedImageUri = null
                 }
@@ -173,14 +222,14 @@ class AddCourseActivity : AppCompatActivity() {
 
     private fun validateImageUrl(url: String) {
         if (!URLUtil.isValidUrl(url)) {
-            binding.etImageUrl?.error = "Invalid URL format"
+            binding.etImageUrl.error = "Invalid URL format"
             return
         }
 
         coroutineScope.launch {
             try {
-                binding.btnValidateUrl?.isEnabled = false
-                binding.btnValidateUrl?.text = "Checking..."
+                binding.btnValidateUrl.isEnabled = false
+                binding.btnValidateUrl.text = "Checking..."
 
                 val isValid = withContext(Dispatchers.IO) {
                     try {
@@ -200,17 +249,17 @@ class AddCourseActivity : AppCompatActivity() {
                 }
 
                 if (isValid) {
-                    binding.etImageUrl?.error = null
+                    binding.etImageUrl.error = null
                     loadImagePreview(url)
                     Toast.makeText(this@AddCourseActivity, "Valid image URL", Toast.LENGTH_SHORT).show()
                 } else {
-                    binding.etImageUrl?.error = "Invalid image URL or image not accessible"
+                    binding.etImageUrl.error = "Invalid image URL or image not accessible"
                 }
             } catch (e: Exception) {
-                binding.etImageUrl?.error = "Error validating URL: ${e.message}"
+                binding.etImageUrl.error = "Error validating URL: ${e.message}"
             } finally {
-                binding.btnValidateUrl?.isEnabled = true
-                binding.btnValidateUrl?.text = "Validate"
+                binding.btnValidateUrl.isEnabled = true
+                binding.btnValidateUrl.text = "Validate"
             }
         }
     }
@@ -233,21 +282,28 @@ class AddCourseActivity : AppCompatActivity() {
     }
 
     private fun setupSaveButton() {
-        binding.btnSave?.setOnClickListener {
+        binding.btnSave.setOnClickListener {
             try {
-                val title = binding.etTitle?.text?.toString()?.trim() ?: ""
-                val description = binding.etDescription?.text?.toString()?.trim() ?: ""
-                val duration = binding.etDuration?.text?.toString()?.trim() ?: ""
+                val title = binding.etTitle.text?.toString()?.trim() ?: ""
+                val description = binding.etDescription.text?.toString()?.trim() ?: ""
+                val duration = binding.etDuration.text?.toString()?.trim() ?: ""
                 
                 if (!validateInput(title, description, duration)) return@setOnClickListener
                 
-                dbHelper?.addCourse(
+                val db = dbHelper
+                if (db == null) {
+                    Toast.makeText(this, "Database not initialized", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                
+                db.addCourse(
                     title,
                     description,
                     duration,
-                    selectedImageUri?.toString() ?: ""
+                    selectedImageUri?.toString() ?: binding.etImageUrl.text?.toString()?.trim() ?: ""
                 )
                 Toast.makeText(this, "Course saved", Toast.LENGTH_SHORT).show()
+                setResult(Activity.RESULT_OK)
                 finish()
                 
             } catch (e: Exception) {
@@ -257,37 +313,18 @@ class AddCourseActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveImageToInternalStorage(uri: Uri): String {
-        val inputStream = contentResolver.openInputStream(uri)
-            ?: throw IllegalStateException("Cannot open input stream for URI: $uri")
-            
-        val file = File(filesDir, "course_images")
-        if (!file.exists()) {
-            file.mkdir()
-        }
-
-        val imageFile = File(file, "img_${System.currentTimeMillis()}.jpg")
-        FileOutputStream(imageFile).use { outputStream ->
-            inputStream.use { input ->
-                input.copyTo(outputStream)
-            }
-        }
-
-        return imageFile.absolutePath
-    }
-
     private fun validateInput(title: String, description: String, duration: String): Boolean {
         if (title.isEmpty()) {
-            binding.etTitle?.error = "Title is required"
+            binding.etTitle.error = "Title is required"
             return false
         }
         if (description.isEmpty()) {
-            binding.etDescription?.error = "Description is required"
+            binding.etDescription.error = "Description is required"
             return false
         }
         val durationPattern = Regex("""^\d+\s*(hours|hrs|minutes|mins)$""")
         if (!durationPattern.matches(duration)) {
-            binding.etDuration?.error = "Invalid duration format"
+            binding.etDuration.error = "Invalid duration format"
             return false
         }
         return true
@@ -295,15 +332,9 @@ class AddCourseActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            finish()
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onDestroy() {
-        dbHelper?.close()
-        super.onDestroy()
-        coroutineScope.cancel()
     }
 }

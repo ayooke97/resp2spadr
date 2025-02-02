@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">AI Course</string>
+    <string name="activity_add_course">Add Course</string>
+    <string name="activity_add_course_title">Add New Course</string>
+    <string name="activity_course_image_preview">Course Image Preview"></string>
+    <string name="activity_course_image_url">Image URL</string>
+    <string name="activity_select_image">Select Image</string>
+    <string name="activity_validate_url">Validate"></string>
+
 </resources>

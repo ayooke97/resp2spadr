@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.aicourse"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.aicourse"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -30,7 +30,12 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isDebuggable = true
+            isMinifyEnabled = false
+        }
     }
+    
     flavorDimensions += "api"
     
     productFlavors {
@@ -40,53 +45,27 @@ android {
             targetSdk = 24
             versionNameSuffix = "-API24"
         }
-        
-        create("api29") {
-            dimension = "api"
-            minSdk = 29
-            targetSdk = 29
-            versionNameSuffix = "-API29"
-        }
-        
-        create("api31") {
-            dimension = "api"
-            minSdk = 31
-            targetSdk = 31
-            versionNameSuffix = "-API31"
-        }
-        
-        create("api33") {
-            dimension = "api"
-            minSdk = 33
-            targetSdk = 33
-            versionNameSuffix = "-API33"
-        }
-        
-        create("api34") {
-            dimension = "api"
-            minSdk = 34
-            targetSdk = 34
-            versionNameSuffix = "-API34"
-        }
-        
-        create("api35") {
-            dimension = "api"
-            minSdk = 35
-            targetSdk = 35
-            versionNameSuffix = "-API35"
-        }
     }
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
     }
+
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11"
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -104,6 +83,7 @@ dependencies {
     implementation(libs.androidx.fragment)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     kapt(libs.glide.compiler)
     
     testImplementation(libs.junit)

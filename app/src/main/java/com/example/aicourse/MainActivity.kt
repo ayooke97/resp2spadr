@@ -29,6 +29,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val addCourseLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            loadCourses()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         val fab: FloatingActionButton = findViewById(R.id.fabAdd)
         fab.setOnClickListener {
             try {
-                startActivity(Intent(this, AddCourseActivity::class.java))
+                addCourseLauncher.launch(Intent(this, AddCourseActivity::class.java))
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error starting AddCourseActivity", e)
                 Toast.makeText(this, "Error opening course creator", Toast.LENGTH_SHORT).show()
